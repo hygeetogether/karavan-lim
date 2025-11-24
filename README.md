@@ -1,80 +1,98 @@
-# CaravanShare - Backend
+# CaravanShare - 백엔드
 
-This directory contains the backend source code for the CaravanShare application, a platform for sharing and renting caravans.
+캐러밴 공유 및 대여 플랫폼 **CaravanShare** 애플리케이션의 백엔드 소스 코드입니다.
 
-## Project Overview
+## 📖 프로젝트 개요
 
-The backend is built with Node.js, Express, and TypeScript. It follows clean architecture principles, separating concerns into distinct layers:
+본 백엔드 서버는 **Node.js**, **Express**, 그리고 **TypeScript**를 기반으로 구축되었습니다. 또한, 클린 아키텍처 원칙을 따라 각 계층의 역할을 명확히 분리하여 유지보수성과 확장성을 높였습니다.
 
--   **Controllers:** Handle incoming HTTP requests and responses.
--   **Services:** Contain the core business logic of the application.
--   **Repositories:** Abstract the data layer, providing a consistent API for data access.
--   **Models:** Define the data structures for the application's domain.
--   **Container:** Manages dependency injection for singleton services and repositories.
+-   **`src/controllers`**: HTTP 요청(Request)을 받아 처리하고 응답(Response)을 반환합니다.
+-   **`src/services`**: 애플리케이션의 핵심 비즈니스 로직을 포함합니다.
+-   **`src/repositories`**: 데이터베이스와의 상호작용을 추상화하여 일관된 API를 제공합니다. 현재는 빠른 프로토타이핑을 위해 인-메모리(In-memory) 데이터 저장소를 사용합니다.
+-   **`src/models`**: 애플리케이션의 도메인 데이터 구조를 정의합니다.
+-   **`src/errors`**: 커스텀 에러 클래스를 정의하여 에러 처리를 표준화합니다.
+-   **`src/container`**: 의존성 주입(DI)을 관리하여 서비스 및 리포지토리의 인스턴스를 싱글톤으로 유지합니다.
 
-Currently, the backend uses an in-memory data store for rapid prototyping and testing.
+## 🛠️ 기술 스택
 
-## Getting Started
+-   **런타임**: Node.js
+-   **프레임워크**: Express.js
+-   **언어**: TypeScript
+-   **테스트**: Jest, ts-jest
+-   **기타**: nodemon, ts-node
 
-### Prerequisites
+## 🚀 시작하기
 
--   Node.js (v16 or later)
+### 전제 조건
+
+-   Node.js (v16 이상)
 -   npm
 
-### Installation
+### 설치
 
-1.  Navigate to the `src` directory:
-    ```bash
-    cd src
-    ```
-2.  Install the dependencies:
+1.  프로젝트의 루트 디렉터리에서 다음 명령어를 실행하여 필요한 의존성을 설치합니다.
     ```bash
     npm install
     ```
 
-### Running the Development Server
+2.  (선택 사항) 설치 과정에서 발견된 보안 취약점을 해결합니다.
+    ```bash
+    npm audit fix
+    ```
 
-To start the server with automatic reloading on file changes, run:
+### 개발 서버 실행
+
+파일 변경 시 자동으로 서버를 재시작하는 개발 서버를 실행하려면 다음 명령어를 사용하세요.
 
 ```bash
 npm run dev
 ```
 
-The server will be available at `http://localhost:3001`.
+서버는 `http://localhost:3001` 주소에서 실행됩니다.
 
-### Running Tests
+### 테스트 실행
 
-To run the unit and integration test suite, run:
+유닛 및 통합 테스트를 실행하려면 다음 명령어를 사용하세요.
 
 ```bash
 npm test
 ```
 
-## API Endpoints
+## 📝 API 엔드포인트
 
-### User Management (`/api/users`)
+### 사용자 관리 (`/api/users`)
 
--   `POST /register`: Register a new user (host or guest).
--   `POST /login`: Log in a user.
+| Method | Endpoint         | 설명                       |
+| :----- | :--------------- | :------------------------- |
+| `POST` | `/register`      | 새 사용자(호스트 또는 게스트) 등록 |
+| `POST` | `/login`         | 사용자 로그인              |
 
-### Caravan Management (`/api/caravans`)
+### 캐러밴 관리 (`/api/caravans`)
 
--   `POST /`: Create a new caravan (requires host user).
--   `GET /`: Get a list of all caravans.
--   `GET /:id`: Get details for a specific caravan.
+| Method | Endpoint         | 설명                       |
+| :----- | :--------------- | :------------------------- |
+| `POST` | `/`              | 새 캐러밴 생성 (호스트 권한 필요) |
+| `GET`  | `/`              | 모든 캐러밴 목록 조회      |
+| `GET`  | `/:id`           | 특정 캐러밴 상세 정보 조회 |
 
-### Reservation System (`/api/reservations`)
+### 예약 시스템 (`/api/reservations`)
 
--   `POST /`: Create a new reservation request.
--   `PATCH /:id/approve`: Approve a pending reservation (host only).
--   `PATCH /:id/reject`: Reject a pending reservation (host only).
--   `PATCH /:id/complete`: Mark an approved reservation as completed.
+| Method  | Endpoint           | 설명                           |
+| :------ | :----------------- | :----------------------------- |
+| `POST`  | `/`                | 새 예약 요청 생성              |
+| `PATCH` | `/:id/approve`     | 예약 승인 (호스트 권한 필요)   |
+| `PATCH` | `/:id/reject`      | 예약 거절 (호스트 권한 필요)   |
+| `PATCH` | `/:id/complete`    | 완료된 예약으로 상태 변경      |
 
-### Payment System (`/api/payments`)
+### 결제 시스템 (`/api/payments`)
 
--   `POST /`: Process a payment for a reservation, which automatically approves it.
--   `GET /history/:userId`: Get the payment history for a specific user.
+| Method | Endpoint             | 설명                               |
+| :----- | :------------------- | :--------------------------------- |
+| `POST` | `/`                  | 예약에 대한 결제 처리 (자동 승인됨) |
+| `GET`  | `/history/:userId`   | 특정 사용자의 결제 내역 조회       |
 
-### Review System (`/api/reviews`)
+### 리뷰 시스템 (`/api/reviews`)
 
--   `POST /`: Create a new review for a completed reservation.
+| Method | Endpoint         | 설명                       |
+| :----- | :--------------- | :------------------------- |
+| `POST` | `/`              | 완료된 예약에 대한 리뷰 작성 |
