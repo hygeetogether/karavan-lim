@@ -1,66 +1,68 @@
-# Build stage
+# Builder stage
 FROM node:20-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package manifests
 COPY package*.json ./
+COPY package-lock.json ./
 COPY prisma ./prisma/
 
-# Install dependencies (use ci for faster, deterministic installs)
-RUN npm ci
+# Bust cache to force reinstall when needed
+ARG CACHEBUST=1
+
+# Install all dependencies (including Prisma 6) deterministically
+RUN npm ci --omit=dev
 
 # Copy source code
 COPY . .
 
-# Set placeholder DATABASE_URL for Prisma generate
+# Placeholder DATABASE_URL for Prisma generate (runtime will override)
 ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
 
-# Generate Prisma Client before build
+# Generate Prisma client before building
 RUN npx prisma generate
 
-# Build the application
+# Build the TypeScript application
 RUN npm run build
 
 # Production stage
 FROM node:20-alpine
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package manifests
 COPY package*.json ./
+COPY package-lock.json ./
 COPY prisma ./prisma/
 
-# Install production dependencies only
+# Install only production dependencies
 RUN npm ci --omit=dev
 
-# Copy built application from builder
+# Copy built assets from builder
 COPY --from=builder /app/dist ./dist
 
-# Set placeholder DATABASE_URL for Prisma generate (will be overridden at runtime)
+# Placeholder DATABASE_URL (will be overridden by Render env)
 ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
 
-# Generate Prisma Client in production
+# Generate Prisma client in production
 RUN npx prisma generate
 
 # Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 
-# Change ownership
+# Adjust ownership
 RUN chown -R nodejs:nodejs /app
 
 # Switch to non-root user
 USER nodejs
 
-# Expose the port
+# Expose application port
 EXPOSE 3001
 
-# Health check
+# Health check endpoint
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
-    CMD node -e "require('http').get('http://localhost:3001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+    CMD node -e "require('http').get('http://localhost:3000/health', r => {process.exit(r.statusCode===200?0:1)})"
 
-# Start the application
-CMD ["npm", "run", "start:prod"]
+# Start the server
+CMD ["npm","run","start:prod"]
