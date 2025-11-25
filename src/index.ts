@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import healthRoutes from './routes/HealthRoutes';
 import userRoutes from './routes/UserRoutes';
 import caravanRoutes from './routes/CaravanRoutes';
 import reservationRoutes from './routes/ReservationRoutes';
@@ -13,6 +14,9 @@ const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(bodyParser.json());
+
+// Health Check Routes (for monitoring and deployment platforms)
+app.use('/', healthRoutes);
 
 // API Routes
 app.use('/api/users', userRoutes);

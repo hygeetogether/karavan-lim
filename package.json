@@ -8,8 +8,11 @@
     "dev": "nodemon src/index.ts",
     "build": "tsc",
     "start": "pm2 start dist/index.js --name caravan-app",
+    "start:prod": "node dist/index.js",
     "stop": "pm2 stop caravan-app",
-    "restart": "pm2 restart caravan-app"
+    "restart": "pm2 restart caravan-app",
+    "migrate:deploy": "npx prisma migrate deploy",
+    "seed": "npx prisma db seed"
   },
   "keywords": [],
   "author": "",

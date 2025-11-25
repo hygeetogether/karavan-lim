@@ -13,9 +13,10 @@ CaravanShare is a peer-to-peer caravan sharing platform that allows users to lis
 
 ## Tech Stack
 
-- **Backend**: Node.js, Express, TypeScript, Prisma, SQLite (Dev) / PostgreSQL (Prod)
+- **Backend**: Node.js, Express, TypeScript, Prisma, PostgreSQL
 - **Frontend**: React, TypeScript, Vite, CSS Modules
 - **Testing**: Jest (Backend)
+- **Deployment**: Docker, Render
 
 ## Getting Started
 
@@ -23,8 +24,11 @@ CaravanShare is a peer-to-peer caravan sharing platform that allows users to lis
 
 - Node.js (v18+)
 - npm
+- Docker & Docker Compose (for local PostgreSQL)
 
 ### Installation
+
+#### Option 1: Local Development with Docker (Recommended)
 
 1.  **Clone the repository**
     ```bash
@@ -32,7 +36,12 @@ CaravanShare is a peer-to-peer caravan sharing platform that allows users to lis
     cd karaban
     ```
 
-2.  **Backend Setup**
+2.  **Start PostgreSQL with Docker**
+    ```bash
+    docker-compose up db -d
+    ```
+
+3.  **Backend Setup**
     ```bash
     # Install dependencies
     npm install
@@ -45,9 +54,9 @@ CaravanShare is a peer-to-peer caravan sharing platform that allows users to lis
     # Start Backend Server
     npm run dev
     ```
-    The backend runs on `http://localhost:3000`.
+    The backend runs on `http://localhost:3001`.
 
-3.  **Frontend Setup**
+4.  **Frontend Setup**
     ```bash
     cd frontend
 
@@ -59,20 +68,84 @@ CaravanShare is a peer-to-peer caravan sharing platform that allows users to lis
     ```
     The frontend runs on `http://localhost:5173`.
 
+#### Option 2: Full Docker Setup
+
+```bash
+# Start all services (backend, frontend, database)
+docker-compose up
+
+# Run migrations (in another terminal)
+docker-compose exec backend npx prisma migrate deploy
+docker-compose exec backend npm run seed
+```
+
+Access:
+- Frontend: `http://localhost`
+- Backend API: `http://localhost:3001`
+
+## Deployment
+
+### Deploy to Render (Recommended - 5 Minutes)
+
+Render provides free hosting with PostgreSQL database included.
+
+**Quick Deploy:**
+1. Push code to GitHub
+2. Create Render account at [render.com](https://render.com)
+3. Click "New" → "Blueprint"
+4. Connect your repository
+5. Render will auto-deploy everything!
+
+**Detailed Guide:** See [RENDER_SETUP.md](./RENDER_SETUP.md)
+
+**Live URLs:**
+- Frontend: `https://karaban-frontend.onrender.com`
+- Backend: `https://karaban-backend.onrender.com`
+
+### Deploy to AWS EC2 (Advanced)
+
+For manual AWS EC2 deployment, see [DEPLOYMENT.md](./DEPLOYMENT.md)
+
 ## Project Structure
 
 - `src/`: Backend source code (Controllers, Services, Repositories, Models)
 - `frontend/`: Frontend React application
 - `prisma/`: Database schema and migrations
 - `tests/`: Backend unit tests
+- `render.yaml`: Render deployment configuration
+- `docker-compose.yml`: Local development setup
 
 ## API Documentation
 
-- `GET /caravans`: List all caravans (supports filtering)
-- `GET /caravans/:id`: Get caravan details
-- `POST /reservations`: Create a reservation
-- `POST /payments`: Process a payment
-- `POST /reviews`: Submit a review
+- `GET /health`: Health check endpoint
+- `GET /api/caravans`: List all caravans (supports filtering)
+- `GET /api/caravans/:id`: Get caravan details
+- `POST /api/reservations`: Create a reservation
+- `POST /api/payments`: Process a payment
+- `POST /api/reviews`: Submit a review
+
+## Environment Variables
+
+See `.env.example` for all required environment variables.
+
+**Local Development:**
+```bash
+cp .env.example .env
+# Edit .env with your local settings
+```
+
+**Production (Render):**
+Environment variables are set automatically via `render.yaml`
+
+## Testing
+
+```bash
+# Run backend tests
+npm test
+
+# Run with coverage
+npm test -- --coverage
+```
 
 ## License
 
