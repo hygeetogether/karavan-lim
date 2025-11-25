@@ -1,4 +1,5 @@
 import { Payment } from '../models/payment';
+import { ReservationStatus } from '../models/reservation';
 import { PaymentRepository } from '../repositories/PaymentRepository';
 import { ReservationRepository } from '../repositories/ReservationRepository';
 import { UserRepository } from '../repositories/UserRepository';
@@ -34,7 +35,7 @@ export class PaymentService {
     await this.paymentRepository.add(payment);
 
     // Update reservation status to CONFIRMED
-    await this.reservationRepository.updateStatus(reservationId, 'CONFIRMED');
+    await this.reservationRepository.updateStatus(reservationId, ReservationStatus.APPROVED);
 
     return payment;
   }
